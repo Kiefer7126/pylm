@@ -5,64 +5,57 @@ import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# ディスカウント係数
-d = 0.4 # d=0の時はCRFに等しい
+class PYP():
+    def __init__(self, d = 0.3, theta = 2):
+        # ディスカウント係数
+        self.d = d # d=0の時はCRFに等しい
+        # 集中度
+        self.theta = theta # theta -> ∞ で一様分布に等しくなる
+        self.table = [] # テーブルとそこに座る客の数
+        self.num_customers = 0 # 全客の数
+        self.num_table = 0 # 全テーブルの数
 
-# 集中度
-theta = 2 # theta -> ∞ で一様分布に等しくなる
-table = []
-num_customers = 0
-num_table = 0
+    def add_customer(self, index):
+    #新しいテーブルに座るとき
+        if index == -1:
+            self.table.append(1)
+            self.num_customers += 1
+
+    #既存のテーブルに座るとき
+        else:
+            self.table[index] +=1
+            self.num_customers += 1
+        self.num_table = len(self.table)
+
+    #相席か新しいテーブルかを選ぶ
+    #相席の場合はテーブル番号を返す
+    def choose_table(self):
+        share_prob = self.num_customers - self.d
+        new_prob = self.theta + self.d * self.num_table
+        #一様分布から生成
+        rnd = np.random.uniform(0, share_prob + new_prob)
+        #相席
+        if rnd < share_prob:
+            num_customer_sum = 0
+            for index, num_customer in enumerate(self.table):
+                num_customer_sum += num_customer
+                if rnd < num_customer_sum:
+                    self.add_customer(index)
+                    break;
+        #新しいテーブル
+        else:
+            self.add_customer(-1)
 
 def main():
-    #table.append(1)
-    #print(table[0])
+    restaurant = PYP()
     for i in range(1000):
-        choose_table()
-    print(table)
-    print(num_table)
-    np_table = np.array(table)
-    plt.bar(range(0,len(table)), np.sort(np_table)[::-1])
+        restaurant.choose_table()
+    print(restaurant.table)
+    print(restaurant.num_table)
+    np_table = np.array(restaurant.table)
+    plt.bar(range(0,restaurant.num_table), np.sort(np_table)[::-1])
     plt.show()
     #plt.savefig("a.png")
-
-
-def add_customer(index):
-    global num_customers, table, num_table
-
-#新しいテーブルに座るとき
-    if index == -1:
-        table.append(1)
-        num_customers += 1
-
-#既存のテーブルに座るとき
-    else:
-        table[index] +=1
-        num_customers += 1
-    num_table = len(table)
-
-
-#相席か新しいテーブルかを選ぶ
-#相席の場合はテーブル番号を返す
-def choose_table():
-    global num_customers, theta, d, num_table
-    share_prob = num_customers - d
-    new_prob = theta + d * num_table
-
-    rnd = np.random.uniform(0, share_prob + new_prob)
-    #相席
-    if rnd < share_prob:
-        num_customer_sum = 0
-        for index, num_customer in enumerate(table):
-            num_customer_sum += num_customer
-            if rnd < num_customer_sum:
-                add_customer(index)
-                break;
-
-    #新しいテーブル
-    else:
-        add_customer(-1)
-
 
 if __name__ == '__main__':
     main()
