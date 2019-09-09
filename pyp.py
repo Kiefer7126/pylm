@@ -30,7 +30,7 @@ class PYP():
     #相席か新しいテーブルかを選ぶ
     #相席の場合はテーブル番号を返す
     def choose_table(self):
-        share_prob = self.num_customers - self.d
+        share_prob = self.num_customers - self.d #max(0, shapre_prob)
         new_prob = self.theta + self.d * self.num_table
         #一様分布から生成
         rnd = np.random.uniform(0, share_prob + new_prob)
