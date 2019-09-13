@@ -9,6 +9,8 @@ from pyp import PYP
 
 seq = ["A","B","A","B","C","D","A","B","A","B","C","D","C","D","A","B","A","B","A","B","C","D","C","D","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","C","D","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","B","A","B","A","B","A","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B"]
 
+#seq = ["A","A","A","B","A","A","A","A","B","A","A","A","A","B","A","A"]
+
 class G0(): #一様分布
     def __init__(self, V):
         self.V = V
@@ -66,7 +68,11 @@ class HPYLM():
                 return PYP(self.parent).word_probability(word)
             else:
                 return PYP(Gu(context, self.parent)).word_probability(word)
-        return self.context_restaurant[context].word_probability(w)
+        return self.context_restaurant[context].word_probability(word)
+
+    def evaluate(self, keylist):
+        for context in self.context_restaurant:
+            self.context_restaurant[context].evaluate(keylist)
 
 
 def main():
@@ -76,18 +82,69 @@ def main():
             seq.append("EOS")
         return list(zip(*(seq[i:] for i in range(n))))
 
-    ngrams = ngram(seq, 1)
-    hpylm = HPYLM(1)
-
-    for i in range(100000):
-        for ngram in ngrams:
-            if i > 0:
-                hpylm.choose_remove_table(ngram[:-1], ngram[-1])
-            hpylm.choose_add_table(ngram[:-1], ngram[-1])
-
-    print(hpylm.context_restaurant[()].num_customers_eating_dish)
 
 
+    def train(): # Gibbs sampling
+        for i in range(1000):
+            for ngram in ngrams:
+                if i > 0:
+                    hpylm.choose_remove_table(ngram[:-1], ngram[-1])
+                hpylm.choose_add_table(ngram[:-1], ngram[-1])
+
+    #print(hpylm.context_restaurant[()].num_customers_eating_dish)
+    def generate(max_seq_len, keylist, n):
+        generate_seq = []
+        for i in range(n-1):
+            generate_seq.append("SOS")
+
+        for i in range(max_seq_len):
+            rnd = np.random.uniform()
+            sum_rnd = 0
+            is_eos = False
+            for key in keylist:
+                #print("context: ", tuple(generate_seq[-(n-1):]))
+                #print("word: ", key)
+                #print("hpylm.word_probability: ", hpylm.word_probability(tuple(generate_seq[-(n-1):]), key))
+                sum_rnd += hpylm.word_probability(tuple(generate_seq[-(n-1):]), key)
+                if rnd < sum_rnd:
+                    if key == "SOS":
+                        is_eos = True
+                        break
+                    else:
+                        generate_seq.append(key)
+                        if key == "EOS":
+                            is_eos = True
+                        break
+            if is_eos:
+                break
+        return generate_seq
+
+    n = 3
+
+    ngrams = ngram(seq, n)
+    #print(ngrams)
+    hpylm = HPYLM(n)
+
+    train()
+
+    c = collections.Counter(seq)
+    print("len(c): ", len(c))
+    keylist = list(c.keys())
+    print("keylist: ", keylist)
+
+    hpylm.evaluate(keylist)
+
+    for context in hpylm.context_restaurant:
+        print("context", context)
+        print(hpylm.context_restaurant[context].num_customers_eating_dish)
+
+    generate_seq = generate(100, keylist, n = 3)
+    print(generate_seq)
+
+    # for ngram in ngrams:
+    #     print("context: ", ngram[:-1])
+    #     print("word: ", ngram[-1])
+    #     print("hpylm.word_probability: ", hpylm.word_probability(ngram[:-1], ngram[-1]))
 
     #for i in range(10):
     #    hpylm.choose_add_table()

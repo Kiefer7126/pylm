@@ -51,7 +51,6 @@ class PYP():
             self.num_customers += 1
 
     #相席か新しいテーブルかを選ぶ
-    #相席の場合はテーブル番号を返す
     def choose_add_table(self, word):
         table_index = 0
         new_table = not word in self.num_customers_eating_dish
@@ -95,12 +94,21 @@ class PYP():
             del self.num_customers_eating_dish[word][index]
             self.num_tables -= 1
 
-    def word_probability(self, w):
+    def word_probability(self, word):
         p = 0.0
         if word in self.num_customers_eating_dish:
             p = sum(self.num_customers_eating_dish[word]) - self.d * len(self.num_customers_eating_dish[word])
         p += (self.theta + self.d * self.num_tables) * self.base.word_probability(word)
-        return p
+        return p / (self.theta + self.num_customers)
+
+    def evaluate(self, keylist):
+        sum_probability = 0
+        for word in keylist:
+            sum_probability += self.word_probability(word)
+        #print("num_customers_eating_dish: ", self.num_customers_eating_dish)
+        #print("sum_probability: ", sum_probability)
+        assert (1 - sum_probability) < 0.00001, "sum_probability is not 1"
+
 
 
 def main():
