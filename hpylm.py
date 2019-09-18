@@ -5,7 +5,7 @@ import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import collections
-from pyp import PYP
+from pyp import PYP, PYP_prior
 from alice import Alice
 import pickle
 
@@ -34,6 +34,9 @@ class G0(): #一様分布
     def word_probability(self, word):
         return 1.0/self.V
 
+    def sample_hyperparameters(self):
+        pass
+
 class Gu():# n-1のcontextが渡される
     def __init__(self, context, parent):
         self.context = context
@@ -52,6 +55,7 @@ class HPYLM():
     def __init__(self, n):
         self.context_restaurant = {}
         self.n = n
+        self.prior = PYP_prior(0.8, 1.0)
         if n == 1:
             #c = collections.Counter(seq)
             self.parent = G0(alice.get_num_vocabulary())
@@ -63,9 +67,9 @@ class HPYLM():
     def choose_add_table(self, context, word):
         if context not in self.context_restaurant:
             if self.n == 1:
-                self.context_restaurant[context] = PYP(self.parent)
+                self.context_restaurant[context] = PYP(self.parent, self.prior)
             else:
-                self.context_restaurant[context] = PYP(Gu(context[1:], self.parent))
+                self.context_restaurant[context] = PYP(Gu(context[1:], self.parent), self.prior)
         self.context_restaurant[context].choose_add_table(word)
 
     def choose_remove_table(self, context, word):
@@ -75,9 +79,9 @@ class HPYLM():
     def word_probability(self, context, word):
         if context not in self.context_restaurant:
             if self.n == 1:
-                return PYP(self.parent).word_probability(word)
+                return PYP(self.parent, self.prior).word_probability(word)
             else:
-                return PYP(Gu(context[1:], self.parent)).word_probability(word)
+                return PYP(Gu(context[1:], self.parent), self.prior).word_probability(word)
         return self.context_restaurant[context].word_probability(word)
 
 
@@ -120,6 +124,7 @@ class HPYLM():
                     self.choose_add_table(ngram[:-1], ngram[-1])
                     #print("ngram[:-1]: ", ngram[:-1])
             perplexity_list.append(self.calc_perplexities(test_sentence))
+            self.sample_hyperparameters()
         return perplexity_list
 
     def calc_perplexities(self, test_sentences):
@@ -163,14 +168,28 @@ class HPYLM():
                 break
         return generate_seq
 
+    def sample_hyperparameters(self):
+        for restaurant in self.context_restaurant.values():
+            restaurant.update_variables()
+
+        self.prior.sample_hyperparameters()
+        self.parent.sample_hyperparameters()
+
+    def get_hyperparameters(self):
+        if self.n == 1:
+            return [(self.prior.d, self.prior.theta)]
+        else:
+            return self.parent.get_hyperparameters() + [(self.prior.d, self.prior.theta)]
+
+
 def main():
     test_data, train_data = alice.get_validation_data()
     perplexity_list = []
 
     itr = 10
-    order = 10
+    order = 1
 
-    for n in range(order):
+    for n in [9]:
         print(n+1)
 
         # ngrams_list: 全センテンスのngramsが入っているリスト [sentence_ngram, sentence_ngram, sentence_ngram]
@@ -201,7 +220,7 @@ def main():
 
     x = np.arange(len(perplexity_list[0]))
 
-    for n in range(9):
+    for n in range(order):
          plt.plot(x, np.array(perplexity_list[n]))
     plt.show()
 

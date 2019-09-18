@@ -8,6 +8,32 @@ import collections
 
 #seq = ["A","B","A","B","C","D","A","B","A","B","C","D","C","D","A","B","A","B","A","B","C","D","C","D","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","C","D","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","B","A","B","A","B","A","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B"]
 
+class PYP_prior():
+
+    def __init__(self, d, theta):
+
+        self.d = d
+        self.a = 1.0
+        self.b = 1.0
+
+        self.theta = theta
+        self.alpha = 1.0
+        self.beta = 1.0
+
+    def sample_hyperparameters(self):
+        self.d = np.random.gamma(self.a, self.b)
+
+        if self.d <= 0 or self.d >= 1:
+            self.d = 0.8
+
+        self.theta = np.random.gamma(self.alpha, self.beta)
+        if self.theta <= 0:
+            self.theta = 10.0
+        self.theta = np.log10(self.theta)
+
+
+
+
 class G0(): #一様分布
     def __init__(self, V):
         self.V = V
@@ -23,16 +49,17 @@ class G0(): #一様分布
         return 1.0/self.V
 
 class PYP():
-    def __init__(self, base, d = 0.7, theta = 2):
-        # ディスカウント係数
-        self.d = d # d=0の時はCRFに等しい
-        # 集中度
-        self.theta = theta # theta -> ∞ で一様分布に等しくなる
+    # ディスカウント係数
+    # self.d = d # d=0の時はCRFに等しい
+    # self.theta = theta # theta -> ∞ で一様分布に等しくなる
+
+    def __init__(self, base, prior):
         self.num_customers_eating_dish = {} #key: dish, value: 各テーブルでそのdishを食べている人数の配列
         self.table = [] # テーブルとそこに座る客の数
         self.num_customers = 0 # 全客の数
         self.num_tables = 0 # 全テーブルの数
-        self.base = base #基底測度
+        self.base = base # 基底測度
+        self.prior = prior
 
     def add_customer(self, index, new_table, word):
 
@@ -60,8 +87,8 @@ class PYP():
         table_index = 0
         new_table = not word in self.num_customers_eating_dish
         if not new_table:
-            share_prob = sum(self.num_customers_eating_dish[word]) - self.d * len(self.num_customers_eating_dish[word]) # max(0, shapre_prob)
-            new_prob = (self.theta + self.d * self.num_tables) * self.base.word_probability(word)
+            share_prob = sum(self.num_customers_eating_dish[word]) - self.prior.d * len(self.num_customers_eating_dish[word]) # max(0, shapre_prob)
+            new_prob = (self.prior.theta + self.prior.d * self.num_tables) * self.base.word_probability(word)
             #一様分布から生成
             rnd = np.random.uniform(0, share_prob + new_prob)
             #新しいテーブル
@@ -72,10 +99,10 @@ class PYP():
                 num_customer_sum = new_prob
                 for index, num_customer in enumerate(self.num_customers_eating_dish[word]):
                     #num_customer_sum += num_customer
-                    if rnd < num_customer_sum + num_customer - self.d:
+                    if rnd < num_customer_sum + num_customer - self.prior.d:
                         table_index = index
                         break
-                    num_customer_sum += num_customer - self.d
+                    num_customer_sum += num_customer - self.prior.d
 
         self.add_customer(table_index, new_table, word)
 
@@ -108,9 +135,9 @@ class PYP():
     def word_probability(self, word):
         p = 0.0
         if word in self.num_customers_eating_dish:
-            p = sum(self.num_customers_eating_dish[word]) - self.d * len(self.num_customers_eating_dish[word])
-        p += (self.theta + self.d * self.num_tables) * self.base.word_probability(word)
-        return p / (self.theta + self.num_customers)
+            p = sum(self.num_customers_eating_dish[word]) - self.prior.d * len(self.num_customers_eating_dish[word])
+        p += (self.prior.theta + self.prior.d * self.num_tables) * self.base.word_probability(word)
+        return p / (self.prior.theta + self.num_customers)
 
 # 評価用の関数
 # レストラン内の確率が1になる
@@ -124,13 +151,22 @@ class PYP():
         #print("sum_probability: ", sum_probability)
         assert (1 - sum_probability) < 0.001, "expected sum_probability is 1 but was " + str(sum_probability)
 
-    #def check_customer(self, sum_num_tables, context):
-        #print(sum_num_tables)
-        #print(self.num_tables)
+    def update_variables(self):
+        if self.num_tables >= 2:
+            xu = np.random.beta(self.prior.theta + 1, self.num_customers - 1)
+            self.prior.beta -= np.log10(xu)
 
-        #assert sum_num_tables == self.base.parent.context_restaurant[context[:-1]].num_customers, "expected self.num_tables == self.base.num_tables but was " + str(self.num_tables) + "!=" + str(self.base.parent.context_restaurant[context[:-1]].num_customers)
+            for i in range(1, self.num_tables):
+                yui = np.random.binomial(1, self.prior.theta / (self.prior.theta + self.prior.d * i))
+                self.prior.a += (1 - yui)
+                self.prior.alpha += yui
 
-
+        for w in self.num_customers_eating_dish:
+            for cuwk in self.num_customers_eating_dish[w]:
+                if cuwk >= 2:
+                    for j in range(1, cuwk):
+                        zuwkj = np.random.binomial(1, (j - 1) / (j - self.prior.d))
+                        self.prior.b += (1 - zuwkj)
 
 def main():
     c = collections.Counter(seq)
