@@ -6,11 +6,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 import collections
 
-seq = ["A","B","A","B","C","D","A","B","A","B","C","D","C","D","A","B","A","B","A","B","C","D","C","D","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","C","D","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","B","A","B","A","B","A","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B"]
+#seq = ["A","B","A","B","C","D","A","B","A","B","C","D","C","D","A","B","A","B","A","B","C","D","C","D","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","C","D","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","C","D","C","D","B","A","B","A","B","A","C","D","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B","A","B"]
 
 class G0(): #一様分布
     def __init__(self, V):
         self.V = V
+        self.num_customers = V
 
     def choose_add_table(self, w):
         pass
@@ -22,7 +23,7 @@ class G0(): #一様分布
         return 1.0/self.V
 
 class PYP():
-    def __init__(self, base, d = 0.3, theta = 2):
+    def __init__(self, base, d = 0.7, theta = 2):
         # ディスカウント係数
         self.d = d # d=0の時はCRFに等しい
         # 集中度
@@ -40,15 +41,19 @@ class PYP():
     #新しいテーブルに座るとき
         if new_table:
             self.num_customers_eating_dish[word].append(1)
+            #self.num_customers_eating_dish[word] += [1] <- ここあやしいけど上と同じ意味っぽい
+
             self.table.append(1)
-            self.num_customers += 1
+            #self.num_customers += 1
             self.num_tables += 1
+            self.base.choose_add_table(word)
 
     #既存のテーブルに座るとき
         else:
             self.num_customers_eating_dish[word][index] +=1
             self.table[index] +=1
-            self.num_customers += 1
+            #self.num_customers += 1
+        self.num_customers +=1
 
     #相席か新しいテーブルかを選ぶ
     def choose_add_table(self, word):
@@ -59,17 +64,19 @@ class PYP():
             new_prob = (self.theta + self.d * self.num_tables) * self.base.word_probability(word)
             #一様分布から生成
             rnd = np.random.uniform(0, share_prob + new_prob)
+            #新しいテーブル
+            if rnd < new_prob:
+                new_table = True
             #既存のテーブル
-            if rnd < share_prob:
-                num_customer_sum = 0
+            else:
+                num_customer_sum = new_prob
                 for index, num_customer in enumerate(self.num_customers_eating_dish[word]):
-                    num_customer_sum += num_customer
-                    if rnd < num_customer_sum:
+                    #num_customer_sum += num_customer
+                    if rnd < num_customer_sum + num_customer - self.d:
                         table_index = index
                         break
-            #新しいテーブル
-            else:
-                new_table = True
+                    num_customer_sum += num_customer - self.d
+
         self.add_customer(table_index, new_table, word)
 
     def choose_remove_table(self, word):
@@ -93,6 +100,10 @@ class PYP():
         if not self.num_customers_eating_dish[word][index]:
             del self.num_customers_eating_dish[word][index]
             self.num_tables -= 1
+            self.base.choose_remove_table(word)
+
+        if not len(self.num_customers_eating_dish[word]):
+            del self.num_customers_eating_dish[word]
 
     def word_probability(self, word):
         p = 0.0
@@ -101,13 +112,23 @@ class PYP():
         p += (self.theta + self.d * self.num_tables) * self.base.word_probability(word)
         return p / (self.theta + self.num_customers)
 
+# 評価用の関数
+# レストラン内の確率が1になる
     def evaluate(self, keylist):
         sum_probability = 0
         for word in keylist:
+            #print(word)
+            #print(self.word_probability(word))
             sum_probability += self.word_probability(word)
         #print("num_customers_eating_dish: ", self.num_customers_eating_dish)
         #print("sum_probability: ", sum_probability)
-        assert (1 - sum_probability) < 0.00001, "sum_probability is not 1"
+        assert (1 - sum_probability) < 0.001, "expected sum_probability is 1 but was " + str(sum_probability)
+
+    #def check_customer(self, sum_num_tables, context):
+        #print(sum_num_tables)
+        #print(self.num_tables)
+
+        #assert sum_num_tables == self.base.parent.context_restaurant[context[:-1]].num_customers, "expected self.num_tables == self.base.num_tables but was " + str(self.num_tables) + "!=" + str(self.base.parent.context_restaurant[context[:-1]].num_customers)
 
 
 
@@ -150,6 +171,7 @@ def main():
         restaurant.choose_add_table(keylist[rnd])
 
     print_log()
+
 
 if __name__ == '__main__':
     main()
