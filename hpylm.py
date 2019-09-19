@@ -125,6 +125,7 @@ class HPYLM():
                     #print("ngram[:-1]: ", ngram[:-1])
             perplexity_list.append(self.calc_perplexities(test_sentence))
             self.sample_hyperparameters()
+            print("get_hyperparameters: ", self.get_hyperparameters())
         return perplexity_list
 
     def calc_perplexities(self, test_sentences):
@@ -186,10 +187,10 @@ def main():
     test_data, train_data = alice.get_validation_data()
     perplexity_list = []
 
-    itr = 10
-    order = 1
+    itr = 20
+    order = 5
 
-    for n in [9]:
+    for n in range(order):
         print(n+1)
 
         # ngrams_list: 全センテンスのngramsが入っているリスト [sentence_ngram, sentence_ngram, sentence_ngram]

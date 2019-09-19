@@ -21,17 +21,12 @@ class PYP_prior():
         self.beta = 1.0
 
     def sample_hyperparameters(self):
-        self.d = np.random.gamma(self.a, self.b)
-
-        if self.d <= 0 or self.d >= 1:
-            self.d = 0.8
+        self.d = np.random.beta(self.a, self.b)
 
         self.theta = np.random.gamma(self.alpha, self.beta)
         if self.theta <= 0:
             self.theta = 10.0
         self.theta = np.log10(self.theta)
-
-
 
 
 class G0(): #一様分布
