@@ -26,6 +26,7 @@ class G0(): #一様分布
         self.context = ()
 
     def choose_add_table(self, word):
+        #print(word)
         pass
 
     def choose_remove_table(self, word):
@@ -37,10 +38,45 @@ class G0(): #一様分布
     def sample_hyperparameters(self):
         pass
 
+class G0_char(): #文字グラム
+    def __init__(self, n):
+        #self.V = V
+        #self.num_customers = V
+        self.context = ()
+        self.npylm = NPYLM(n, is_char = True)
+        self.n = n
+
+    def choose_add_table(self, word):
+        char_list = list(word)
+        for char_ngram in alice.get_ngram(char_list, self.n): # charのn-gram
+            char_context = char_ngram[:-1]
+            self.npylm.choose_add_table(char_context, char_ngram[-1])
+
+    def choose_remove_table(self, word):
+        char_list = list(word)
+        for char_ngram in alice.get_ngram(char_list, self.n): # charのn-gram
+            char_context = char_ngram[:-1]
+            self.npylm.choose_remove_table(char_context, char_ngram[-1])
+
+    def word_probability(self, word):
+        probability = 1
+        char_list = list(word)
+        for char_ngram in alice.get_ngram(char_list, self.n): # charのn-gram
+            char_context = char_ngram[:-1]
+            probability *= self.npylm.word_probability(char_context, char_ngram[-1])
+
+        return probability
+        #self.npylm.word_probability()
+
+    def sample_hyperparameters(self):
+        pass
+
 class Gu():# n-1のcontextが渡される
     def __init__(self, context, parent):
         self.context = context
         self.parent = parent
+
+        #print("self.parent: ", self.parent)
 
     def choose_add_table(self, word):
         return self.parent.choose_add_table(self.context, word)
@@ -51,16 +87,18 @@ class Gu():# n-1のcontextが渡される
     def word_probability(self, word):
         return self.parent.word_probability(self.context, word)
 
-class HPYLM():
-    def __init__(self, n):
+class NPYLM():
+    def __init__(self, n, is_char = False):
         self.context_restaurant = {}
         self.n = n
         self.prior = PYP_prior(0.8, 1.0)
         if n == 1:
-            #c = collections.Counter(seq)
-            self.parent = G0(alice.get_num_vocabulary())
+            if is_char:
+                self.parent = G0(alice.get_num_vocabulary())
+            else:
+                self.parent = G0_char(3)
         else:
-            self.parent = HPYLM(n-1)
+            self.parent = NPYLM(n-1, is_char)
 
     #相席か新しいテーブルかを選ぶ
     #相席の場合はテーブル番号を返す
@@ -69,7 +107,7 @@ class HPYLM():
             if self.n == 1:
                 self.context_restaurant[context] = PYP(self.parent, self.prior)
             else:
-                print(self.parent)
+                #print(self.parent)
                 self.context_restaurant[context] = PYP(Gu(context[1:], self.parent), self.prior)
         self.context_restaurant[context].choose_add_table(word)
 
@@ -188,7 +226,7 @@ def main():
     test_data, train_data = alice.get_validation_data()
     perplexity_list = []
 
-    itr = 20
+    itr = 10
     order = 5
 
     for n in range(order):
@@ -208,11 +246,11 @@ def main():
         # with open('test.pickle', 'rb') as f:
         #     hpylm = pickle.load(f)
 
-        hpylm = HPYLM(n+1)
+        npylm = NPYLM(n+1)
 
-        perplexity_list.append(hpylm.train(itr, train_ngrams_list, test_ngrams_list))
+        perplexity_list.append(npylm.train(itr, train_ngrams_list, test_ngrams_list))
 
-        hpylm.check_customer()
+        npylm.check_customer()
         #hpylm.evaluate(alice.get_vocabulary())
 
         # with open('test.pickle', 'wb') as f:

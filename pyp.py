@@ -12,10 +12,13 @@ class PYP_prior():
 
     def __init__(self, d, theta):
 
+        # ディスカウント
         self.d = d
+        # ディスカウントの推定のベータ分布のパラメタ a, b
         self.a = 1.0
         self.b = 1.0
 
+        # 集中度の推定のガンマ分布のパラメタ α, β
         self.theta = theta
         self.alpha = 1.0
         self.beta = 1.0
@@ -57,7 +60,6 @@ class PYP():
         self.prior = prior
 
     def add_customer(self, index, new_table, word):
-
         if word not in self.num_customers_eating_dish:
             self.num_customers_eating_dish[word] = []
     #新しいテーブルに座るとき
@@ -129,6 +131,7 @@ class PYP():
 
     def word_probability(self, word):
         p = 0.0
+        #print("self.base: ", self.base)
         if word in self.num_customers_eating_dish:
             p = sum(self.num_customers_eating_dish[word]) - self.prior.d * len(self.num_customers_eating_dish[word])
         p += (self.prior.theta + self.prior.d * self.num_tables) * self.base.word_probability(word)
