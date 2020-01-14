@@ -141,13 +141,14 @@ class PYP():
 # レストラン内の確率が1になる
     def evaluate(self, keylist):
         sum_probability = 0
+        #print("keylist: ", keylist)
         for word in keylist:
             #print(word)
             #print(self.word_probability(word))
             sum_probability += self.word_probability(word)
         #print("num_customers_eating_dish: ", self.num_customers_eating_dish)
-        #print("sum_probability: ", sum_probability)
-        assert (1 - sum_probability) < 0.001, "expected sum_probability is 1 but was " + str(sum_probability)
+        print("sum_probability: ", sum_probability)
+        #assert (1 - sum_probability) < 0.001, "expected sum_probability is 1 but was " + str(sum_probability)
 
     def update_variables(self):
         if self.num_tables >= 2:
